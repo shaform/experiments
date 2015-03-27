@@ -1,4 +1,5 @@
 import argparse
+import math
 
 from collections import defaultdict
 
@@ -16,18 +17,24 @@ def load_file(path):
         for l in f:
             yield l.strip().split()
 
+
+def tf_idf(N, tf, df):
+    return tf * math.log(N / df)
+
 if __name__ == '__main__':
     args = process_commands()
 
     d = defaultdict(int)
+    N = 0
     vocab = {}
     for tokens in load_file(args.input):
-        for t in tokens:
+        N += 1
+        for t in set(tokens):
             if t not in vocab:
                 vocab[t] = len(vocab) + 1
             d[vocab[t]] += 1
 
-        for t in zip(tokens, tokens[1:]):
+        for t in set(zip(tokens, tokens[1:])):
             if t not in vocab:
                 vocab[t] = len(vocab) + 1
             d[vocab[t]] += 1
@@ -40,6 +47,6 @@ if __name__ == '__main__':
             for t in zip(tokens, tokens[1:]):
                 features[vocab[t]] += 1
 
-            vector = ['{}:{}'.format(k, v / d[k])
+            vector = ['{}:{}'.format(k, tf_idf(N, v, d[k]))
                       for k, v in sorted(features.items())]
             f.write('x {}\n'.format(' '.join(vector)))
