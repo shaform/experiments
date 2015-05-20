@@ -1,7 +1,9 @@
-python3 preprocess.py --server $SERVER --port $PORT --user $USER --password $PASS --output data.txt --input 207884_hotel_training.txt
+# -- preprocess -- #
+# You'll need 207884_hotel_training.txt & CKIP segmenter to run preprocess.py
+#python3 preprocess.py --server $SERVER --port $PORT --user $USER --password $PASS --output data.txt --input 207884_hotel_training.txt
 python3 split.py --input data/data.txt --train_pos data/train_pos.txt --train_neg data/train_neg.txt --test_pos data/test_pos.txt --test_neg data/test_neg.txt
 
-# rnnlm
+# -- rnnlm -- #
 mkdir rnnlm
 cd rnnlm
 wget https://f25ea9ccb7d3346ce6891573d543960492b92c30.googledrive.com/host/0ByxdPXuxLPS5RFM5dVNvWVhTd0U/rnnlm-0.4b.tgz
@@ -31,7 +33,7 @@ python3 normalize.py --input scores/RNNLM --output scores/RNNLM --type rnnlm
 
 python3 evaluate.py --test_pos data/test_pos.txt --scores scores/RNNLM
 
-# word2vec - sentence vectors
+# -- word2vec - sentence vectors -- #
 git clone https://github.com/shaform/word2vec.git
 cd word2vec
 git checkout doc2vec
@@ -62,6 +64,7 @@ python3 normalize.py --input scores/DOC2VEC --output scores/DOC2VEC --type logre
 
 python3 evaluate.py --test_pos data/test_pos.txt --scores scores/DOC2VEC
 
+# -- TF-IDF -- #
 mkdir tfidf
 cd tfidf
 cat ../data/train_pos.txt ../data/train_neg.txt ../data/test_pos.txt ../data/test_neg.txt > all.txt
@@ -76,6 +79,8 @@ cd ..
 python3 normalize.py --input scores/TFIDF --output scores/TFIDF --type logreg
 
 python3 evaluate.py --test_pos data/test_pos.txt --scores scores/TFIDF
+
+# -- TOTAL -- #
 
 paste scores/RNNLM scores/DOC2VEC scores/TFIDF | awk '{print ($1+$2+$3)/3;}' > scores/TOTAL
 python3 evaluate.py --test_pos data/test_pos.txt --scores scores/TOTAL
