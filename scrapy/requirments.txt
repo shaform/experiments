@@ -1,0 +1,4 @@
+Scrapy>=1.1.0rc1
+jieba>=0.38
+seaborn>=0.7.0
+scikit-learn>=0.16.1
