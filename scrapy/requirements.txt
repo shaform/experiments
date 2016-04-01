@@ -1,0 +1,8 @@
+Scrapy>=1.1.0rc3
+jieba>=0.38
+seaborn>=0.7.0
+numpy>=1.10.4
+scipy>=0.17.0
+scikit-learn>=0.16.1
+cryptography>=1.2.2
+pyOpenSSL>=0.15.1
