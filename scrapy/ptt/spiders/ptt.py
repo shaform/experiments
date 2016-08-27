@@ -2,6 +2,7 @@ import logging
 
 from datetime import datetime
 
+import html2text
 import scrapy
 
 from scrapy.http import FormRequest
@@ -61,8 +62,9 @@ class PTTSpider(scrapy.Spider):
                 0].extract()
         item['date'] = datetime.strptime(datetime_str, '%a %b %d %H:%M:%S %Y')
 
-        item['content'] = response.xpath('//div[@id="main-content"]/text()')[
-            0].extract()
+        converter = html2text.HTML2Text()
+        converter.ignore_links = True
+        item['content'] = converter.handle(response.xpath('//div[@id="main-content"]')[ 0].extract())
 
         comments = []
         total_score = 0
