@@ -1,0 +1,10 @@
+jupyter==1.0.0
+matplotlib==2.0.0
+notebook==4.3.1
+numpy==1.11.3
+pymongo==3.4.0
+sacred==0.7b3
+sacredboard==0.1.2
+scikit-learn==0.18.1
+tensorflow-gpu==1.0.1
+xgboost==0.6a2
