@@ -17,7 +17,6 @@ ex = Experiment('mnist_sampled')
 
 @ex.config
 def my_config():
-    data_dir = 'MNIST_data'
     sample_size = 500
     classifier = 'svc'
 
@@ -42,7 +41,7 @@ def get_classifier(classifier):
 
 
 @ex.automain
-def run_experiments(data_dir):
+def run_experiments(data_dir='MNIST_data'):
     mnist = input_data.read_data_sets(data_dir, one_hot=False)
     X_test = mnist.test.images
     y_test = mnist.test.labels
