@@ -1,5 +1,5 @@
 """
-Sampled MNIST Expriments
+Sampled MNIST Experiments
 """
 
 import numpy as np
