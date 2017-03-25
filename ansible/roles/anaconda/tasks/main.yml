@@ -1,0 +1,17 @@
+---
+
+- name: download Anaconda
+  get_url:
+    url: 'https://repo.continuum.io/archive/Anaconda2-4.3.1-Linux-x86_64.sh'
+    dest: /tmp/Anaconda2-4.3.1-Linux-x86_64.sh
+    mode: '0755'
+
+- name: install Anaconda
+  command: bash /tmp/Anaconda2-4.3.1-Linux-x86_64.sh -b -p {{ ansible_env.HOME }}/anaconda2
+  args:
+    creates: '{{ ansible_env.HOME}}/anaconda2'
+
+- name: add Anaconda to PATH
+  lineinfile:
+    name: '{{ ansible_env.HOME }}/.bashrc'
+    line: 'export PATH=$HOME/anaconda2/bin:${PATH}'

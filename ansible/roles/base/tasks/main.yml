@@ -1,0 +1,50 @@
+---
+
+- name: mkdir for configure files
+  file:
+    dest: '{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '{{ item.mode | default("0755") }}'
+    state: directory
+
+  with_items:
+    - dest: /etc/sudoers.d
+
+- name: set sudo umask
+  copy:
+    dest: '{{ item.dest }}'
+    owner: root
+    group: root
+    mode: '{{ item.mode | default("0644") }}'
+    content: '{{ item.content }}'
+
+  with_items:
+    - dest: /etc/sudoers.d/umask
+      mode: '0400'
+      content: |
+        # This file is managed by Ansible. DO NOT EDIT.
+
+        Defaults umask_override
+        Defaults umask = 0002
+
+- name: upgrade packages
+  apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: install core packages
+  apt:
+    name: '{{ item.name }}'
+    state: '{{ item.state | default("present") }}'
+    purge: yes
+
+  with_items:
+    - name: git-core
+    - name: gufw
+    - name: htop
+    - name: p7zip-full
+    - name: p7zip-rar
+    - name: screen
+    - name: tmux
+    - name: yadm

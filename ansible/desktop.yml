@@ -1,0 +1,8 @@
+---
+
+- hosts: '{{ hosts }}'
+  become: true
+  become_user: root
+  roles:
+    - base
+    - desktop
