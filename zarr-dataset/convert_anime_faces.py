@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 def as_array(image):
-    return np.asarray(image)
+    return np.asarray(image).swapaxes(2, 0)
 
 
 def convert_data_set(path, data_set, batch_size=1000):
@@ -23,7 +23,7 @@ def convert_data_set(path, data_set, batch_size=1000):
         root = zarr.group(store=store, overwrite=True)
         images_set = root.zeros(
             'images',
-            shape=(num_examples, 96, 96, 3),
+            shape=(num_examples, 3, 96, 96),
             chunks=(1, None, None, None),
             dtype='u1')
         labels_set = root.zeros(
@@ -46,8 +46,8 @@ def main():
     train_set, val_set = random_split(data_set, [train_size, val_size])
 
     confs = [
-        ('data/anime_faces/train', train_set),
-        ('data/anime_faces/val', val_set),
+        ('data/anime_faces/train.lmdb', train_set),
+        ('data/anime_faces/val.lmdb', val_set),
     ]
     for path, data_set in confs:
         convert_data_set(path, data_set)

@@ -70,7 +70,7 @@ class Model(nn.Module):
 
 
 def main(batch_size=64, epochs=50):
-    data_train = FaceDataset('data/anime_faces/train')
+    data_train = FaceDataset('data/anime_faces/train.lmdb')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     loader = DataLoader(data_train, batch_size=batch_size, num_workers=10)
@@ -81,8 +81,7 @@ def main(batch_size=64, epochs=50):
     for epoch in trange(epochs):
         t = tqdm(loader)
         for i, (images, labels) in enumerate(t):
-            images = images.to(device).permute(
-                0, 3, 1, 2).contiguous()  # to [B, C, ...]
+            images = images.to(device)
             labels = labels.to(device)
 
             optim.zero_grad()
@@ -96,14 +95,13 @@ def main(batch_size=64, epochs=50):
             t.set_postfix(
                 epoch=epoch, i=i, loss=loss.item(), accuracy=accuracy.item())
 
-    data_val = FaceDataset('data/anime_faces/val')
+    data_val = FaceDataset('data/anime_faces/val.lmdb')
     val_loader = DataLoader(data_val, batch_size=batch_size, num_workers=0)
     total = len(data_val)
     total_correct = 0
     model.eval()
     for images, labels in val_loader:
-        images = images.to(device).permute(0, 3, 1,
-                                           2).contiguous()  # to [B, C, ...]
+        images = images.to(device)
         labels = labels.to(device)
         logits = model(images)
         predicts = torch.argmax(F.softmax(logits, dim=1), dim=1)
