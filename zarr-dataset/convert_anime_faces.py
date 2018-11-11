@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import zarr
 from torch.utils.data import DataLoader
@@ -16,20 +18,25 @@ def convert_data_set(path, data_set, batch_size=1000):
 
     num_examples = len(data_set)
 
-    root = zarr.open(path, mode='w')
-    images_set = root.zeros(
-        'images',
-        shape=(num_examples, 96, 96, 3),
-        chunks=(batch_size, None, None, None),
-        dtype='u1')
-    labels_set = root.zeros(
-        'labels', shape=(num_examples, ), chunks=(batch_size, ), dtype='u1')
-    current_iter = 0
-    for images, labels in tqdm(loader):
-        size = images.shape[0]
-        images_set[current_iter:current_iter + size] = images
-        labels_set[current_iter:current_iter + size] = labels
-        current_iter += size
+    os.makedirs(path, exist_ok=True)
+    with zarr.LMDBStore(path) as store:
+        root = zarr.group(store=store, overwrite=True)
+        images_set = root.zeros(
+            'images',
+            shape=(num_examples, 96, 96, 3),
+            chunks=(batch_size, None, None, None),
+            dtype='u1')
+        labels_set = root.zeros(
+            'labels',
+            shape=(num_examples, ),
+            chunks=(batch_size, ),
+            dtype='u1')
+        current_iter = 0
+        for images, labels in tqdm(loader):
+            size = images.shape[0]
+            images_set[current_iter:current_iter + size] = images
+            labels_set[current_iter:current_iter + size] = labels
+            current_iter += size
 
 
 def main():

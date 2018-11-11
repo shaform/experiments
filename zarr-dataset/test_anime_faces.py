@@ -15,8 +15,9 @@ class FaceDataset(Dataset):
         self.keys = ('images', 'labels')
         assert os.path.exists(path), 'file `{}` not exists!'.format(path)
 
-        root = zarr.open(path, mode='r')
-        self.num_examples = root['labels'].shape[0]
+        with zarr.LMDBStore(path) as store:
+            zarr_db = zarr.group(store=store)
+            self.num_examples = zarr_db['labels'].shape[0]
         self.datasets = None
 
         if transforms is None:
@@ -31,8 +32,9 @@ class FaceDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.datasets is None:
-            root = zarr.open(self.path, mode='r')
-            self.datasets = {key: root[key] for key in self.keys}
+            store = zarr.LMDBStore(self.path)
+            zarr_db = zarr.group(store=store)
+            self.datasets = {key: zarr_db[key] for key in self.keys}
 
         items = []
         for key in self.keys:
@@ -48,23 +50,30 @@ class Model(nn.Module):
                  hidden_size=25):
         super().__init__()
 
-        self.layer1 = nn.Linear(input_size, hidden_size)
-        self.layer2 = nn.Linear(hidden_size, output_size)
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=6, stride=2, padding=2),
+            nn.BatchNorm2d(16), nn.ReLU(), nn.MaxPool2d(
+                kernel_size=2, stride=2))
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(16, 32, kernel_size=6, stride=2, padding=2),
+            nn.BatchNorm2d(32), nn.ReLU(), nn.MaxPool2d(
+                kernel_size=2, stride=2))
+        self.fc = nn.Linear(6 * 6 * 32, output_size)
         self.criteria = nn.CrossEntropyLoss()
 
     def forward(self, inputs):
-        inputs = inputs.view(inputs.size()[0], -1)
         outputs = self.layer1(inputs)
         outputs = self.layer2(outputs)
+        outputs = outputs.reshape(outputs.size(0), -1)
+        outputs = self.fc(outputs)
         return outputs
 
 
-def main(batch_size=30, epochs=1):
+def main(batch_size=64, epochs=1):
     data_train = FaceDataset('data/anime_faces/train')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    loader = DataLoader(
-        data_train, batch_size=batch_size, shuffle=True, num_workers=5)
+    loader = DataLoader(data_train, batch_size=batch_size, num_workers=5)
     model = Model()
     model.to(device)
     model.train()
@@ -72,7 +81,8 @@ def main(batch_size=30, epochs=1):
     for epoch in trange(epochs):
         t = tqdm(loader)
         for i, (images, labels) in enumerate(t):
-            images = images.to(device)
+            images = images.to(device).permute(
+                0, 3, 1, 2).contiguous()  # to [B, C, ...]
             labels = labels.to(device)
 
             optim.zero_grad()
@@ -92,7 +102,8 @@ def main(batch_size=30, epochs=1):
     total_correct = 0
     model.eval()
     for images, labels in val_loader:
-        images = images.to(device)
+        images = images.to(device).permute(0, 3, 1,
+                                           2).contiguous()  # to [B, C, ...]
         labels = labels.to(device)
         logits = model(images)
         predicts = torch.argmax(F.softmax(logits, dim=1), dim=1)
@@ -103,17 +114,3 @@ def main(batch_size=30, epochs=1):
 
 if __name__ == '__main__':
     main()
-
-# def parse_args():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--input-file', default='data/test.lmdb')
-#     parser.add_argument('--batch-size', type=int, default=10)
-#     parser.add_argument('--cuda', action='store_true')
-#     return parser.parse_args()
-
-# def main():
-#     args = parse_args()
-#     train(**vars(args))
-
-# if __name__ == '__main__':
-#     main()
