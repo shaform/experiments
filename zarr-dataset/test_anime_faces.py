@@ -69,11 +69,11 @@ class Model(nn.Module):
         return outputs
 
 
-def main(batch_size=64, epochs=1):
+def main(batch_size=64, epochs=50):
     data_train = FaceDataset('data/anime_faces/train')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    loader = DataLoader(data_train, batch_size=batch_size, num_workers=5)
+    loader = DataLoader(data_train, batch_size=batch_size, num_workers=10)
     model = Model()
     model.to(device)
     model.train()
