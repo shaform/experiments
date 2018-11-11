@@ -1,0 +1,12 @@
+name: zarr
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - ipython=7.1.1=py36h39e3cac_0
+  - python=3.6.7=h0371630_0
+  - pytorch=0.4.1=py36_py35_py27__9.0.176_7.1.2_2
+  - torchvision=0.2.1=py36_1
+  - tqdm=4.28.1=py36h28b3542_0
+  - zarr=2.2.0=py_1
