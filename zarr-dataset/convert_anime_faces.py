@@ -24,13 +24,10 @@ def convert_data_set(path, data_set, batch_size=1000):
         images_set = root.zeros(
             'images',
             shape=(num_examples, 96, 96, 3),
-            chunks=(batch_size, None, None, None),
+            chunks=(1, None, None, None),
             dtype='u1')
         labels_set = root.zeros(
-            'labels',
-            shape=(num_examples, ),
-            chunks=(batch_size, ),
-            dtype='u1')
+            'labels', shape=(num_examples, ), chunks=(1, ), dtype='u1')
         current_iter = 0
         for images, labels in tqdm(loader):
             size = images.shape[0]
