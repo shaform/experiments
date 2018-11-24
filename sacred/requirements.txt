@@ -1,6 +1,6 @@
 jupyter==1.0.0
 matplotlib==2.0.0
-notebook==5.4.1
+notebook==5.7.2
 numpy==1.11.3
 pymongo==3.4.0
 sacred==0.7b3
